@@ -3,18 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum Direction
+{
+    North, South, East, West
+}
 public class Movement : MonoBehaviour
 {
-    enum Direction
-    {
-        North, South, East, West
-    }
-
     public float speed;
 
     private Rigidbody2D rb;
 
-    private Direction movingDir;
+    public Direction movingDir;
+
+    [SerializeField] bool movingHorizontally = false, canCheck = true;
+
+    [SerializeField] private LayerMask obstacleMask;
     // Start is called before the first frame update
     void Start()
     {
@@ -24,32 +27,61 @@ public class Movement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetAxisRaw("Horizontal") != 0)
+        if (movingHorizontally)
         {
-            rb.constraints = RigidbodyConstraints2D.FreezePositionY;
+            if (Physics2D.Raycast(transform.position, transform.TransformDirection(Vector2.left), 1, obstacleMask) || Physics2D.Raycast(transform.position, transform.TransformDirection(Vector2.right), 1, obstacleMask))
+            {
+                canCheck = true;
+            }
+            else
+            {
+                canCheck = false;
+            }
+        }
+        else
+        {
+            if (Physics2D.Raycast(transform.position, transform.TransformDirection(Vector2.up), 1, obstacleMask) || Physics2D.Raycast(transform.position, transform.TransformDirection(Vector2.down), 1, obstacleMask))
+            {
+                canCheck = true;
+            }
+            else
+            {
+                canCheck = false;
+            }
+        }
 
-            if (Input.GetAxisRaw("Horizontal") > 0)
-            {
-                movingDir = Direction.East;
-            }
-            else
-            {
-                movingDir = Direction.West;
-            }
-        }
-        else if (Input.GetAxisRaw("Vertical") != 0)
+        if (canCheck)
         {
-            rb.constraints = RigidbodyConstraints2D.FreezePositionX;
-            
-            if (Input.GetAxisRaw("Vertical") > 0)
+            if (Input.GetAxisRaw("Horizontal") != 0)
             {
-                movingDir = Direction.North;
+                rb.constraints = RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
+                movingHorizontally = true;
+
+                if (Input.GetAxisRaw("Horizontal") > 0)
+                {
+                    movingDir = Direction.East;
+                }
+                else
+                {
+                    movingDir = Direction.West;
+                }
             }
-            else
+            else if (Input.GetAxisRaw("Vertical") != 0)
             {
-                movingDir = Direction.South;
+                rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
+                movingHorizontally = false;
+            
+                if (Input.GetAxisRaw("Vertical") > 0)
+                {
+                    movingDir = Direction.North;
+                }
+                else
+                {
+                    movingDir = Direction.South;
+                }
             }
         }
+        
     }
 
     private void FixedUpdate()
