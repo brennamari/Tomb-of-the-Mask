@@ -3,21 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum Direction
+{
+    North, South, East, West
+}
 public class Movement : MonoBehaviour
 {
-    enum Direction
-    {
-        North, South, East, West
-    }
-
     public float speed;
 
     private Rigidbody2D rb;
 
-    private Direction movingDir;
+    public Direction movingDir;
 
     [SerializeField] bool movingHorizontally = false, canCheck = true;
-    [SerializeField] LayerMask obstacleMask;
+
+    [SerializeField] private LayerMask obstacleMask;
     // Start is called before the first frame update
     void Start()
     {
@@ -29,7 +29,7 @@ public class Movement : MonoBehaviour
     {
         if (movingHorizontally)
         {
-            if(Physics2D.Raycast(transform.position, Vector2.left, .6f, obstacleMask) || Physics2D.Raycast(transform.position, Vector2.right, .6f, obstacleMask))
+            if (Physics2D.Raycast(transform.position, transform.TransformDirection(Vector2.left), 1, obstacleMask) || Physics2D.Raycast(transform.position, transform.TransformDirection(Vector2.right), 1, obstacleMask))
             {
                 canCheck = true;
             }
@@ -37,8 +37,10 @@ public class Movement : MonoBehaviour
             {
                 canCheck = false;
             }
-            
-            if(Physics2D.Raycast(transform.position, Vector2.up, .6f, obstacleMask) || Physics2D.Raycast(transform.position, Vector2.down, .6f, obstacleMask))
+        }
+        else
+        {
+            if (Physics2D.Raycast(transform.position, transform.TransformDirection(Vector2.up), 1, obstacleMask) || Physics2D.Raycast(transform.position, transform.TransformDirection(Vector2.down), 1, obstacleMask))
             {
                 canCheck = true;
             }
@@ -52,7 +54,7 @@ public class Movement : MonoBehaviour
         {
             if (Input.GetAxisRaw("Horizontal") != 0)
             {
-                rb.constraints = RigidbodyConstraints2D.FreezePositionY;
+                rb.constraints = RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
                 movingHorizontally = true;
 
                 if (Input.GetAxisRaw("Horizontal") > 0)
@@ -60,15 +62,13 @@ public class Movement : MonoBehaviour
                     movingDir = Direction.East;
                 }
                 else
-
                 {
                     movingDir = Direction.West;
                 }
             }
-            else if(Input.GetAxisRaw("Vertical") != 0)
-
+            else if (Input.GetAxisRaw("Vertical") != 0)
             {
-                rb.constraints = RigidbodyConstraints2D.FreezePositionX;
+                rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
                 movingHorizontally = false;
             
                 if (Input.GetAxisRaw("Vertical") > 0)
@@ -76,31 +76,30 @@ public class Movement : MonoBehaviour
                     movingDir = Direction.North;
                 }
                 else
-
                 {
                     movingDir = Direction.South;
                 }
             }
         }
+        
     }
 
-        private void FixedUpdate()
+    private void FixedUpdate()
     {
         switch (movingDir)
         {
-            case Direction.North:
-                rb.velocity = new Vector2(0, speed * Time.fixedDeltaTime);   
-                break;
-            case Direction.South:
-                rb.velocity = new Vector2(0, -speed * Time.fixedDeltaTime);   
-                break;
-            case Direction.East:
-                rb.velocity = new Vector2(speed * Time.fixedDeltaTime, 0);   
-                break;
-            case Direction.West:
-                rb.velocity = new Vector2(-speed * Time.fixedDeltaTime, 0);
-                break;
-            
+           case Direction.North:
+               rb.velocity = new Vector2(0, speed * Time.fixedDeltaTime);
+               break;
+           case Direction.South:
+               rb.velocity = new Vector2(0, -speed * Time.fixedDeltaTime);
+               break;
+           case Direction.East:
+               rb.velocity = new Vector2( speed * Time.fixedDeltaTime, 0);
+               break;
+           case Direction.West:
+               rb.velocity = new Vector2( -speed * Time.fixedDeltaTime, 0);
+               break;
         }
     }
 }
