@@ -9,6 +9,8 @@ public class PlayerCollisionManager : MonoBehaviour
     private RaycastHit2D hit;
 
     [SerializeField] private LayerMask obstacleMask;
+
+    [SerializeField] private float timeAfterSpikesKill;
     // Start is called before the first frame update
     void Start()
     {
@@ -40,6 +42,11 @@ public class PlayerCollisionManager : MonoBehaviour
             {
                 Destroy(GameObject.Find("Player"));
             }
+        }
+
+        if (info.collider.tag == "SpikesAfterTime")
+        {
+            info.collider.GetComponent<SpikesAfterTime>().startCountDown();
         }
     }
 }
