@@ -41,6 +41,7 @@ public class PlayerCollisionManager : MonoBehaviour
             if (hit != null)
             {
                 Destroy(GameObject.Find("Player"));
+                GameOver.instance.Over();
             }
         }
 
